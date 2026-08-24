@@ -2,6 +2,7 @@ services:
   - type: web
     name: success-computer-institute
     runtime: python
+    plan: free
     buildCommand: ""
     startCommand: "python server.py"
     envVars:
