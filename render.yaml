@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: success-computer-institute
+    runtime: python
+    buildCommand: ""
+    startCommand: "python server.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.15
