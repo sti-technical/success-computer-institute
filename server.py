@@ -50,14 +50,54 @@ def read_state():
 			return DEFAULT_STATE
 
 
-def write_state(state):
+def merge_state(payload):
+	"""Read the freshest state and upsert only the keys present in payload.
+
+	This is critical for correctness with many concurrent students: a client's
+	in-memory copy of ALL courses/users can be stale by the time it saves, so we
+	never blindly replace the whole 'courses' or 'users' dict. Instead we only
+	touch the specific user(s)/course(s) included in this request, leaving
+	everyone else's data exactly as-is. Deletions are explicit via
+	delete_courses / delete_users so "not present" never means "delete".
+	"""
 	with LOCK, sqlite3.connect(DB_PATH) as conn:
+		row = conn.execute("SELECT data FROM app_state WHERE id = 1").fetchone()
+		try:
+			state = json.loads(row[0]) if row else json.loads(json.dumps(DEFAULT_STATE))
+		except (TypeError, ValueError):
+			state = json.loads(json.dumps(DEFAULT_STATE))
+		state.setdefault("courses", {})
+		state.setdefault("users", {})
+
+		incoming_users = payload.get("users")
+		if isinstance(incoming_users, dict):
+			for mobile, user in incoming_users.items():
+				if isinstance(user, dict):
+					state["users"][mobile] = user
+
+		incoming_courses = payload.get("courses")
+		if isinstance(incoming_courses, dict):
+			for name, course in incoming_courses.items():
+				if isinstance(course, dict):
+					state["courses"][name] = course
+
+		delete_courses = payload.get("delete_courses")
+		if isinstance(delete_courses, list):
+			for name in delete_courses:
+				state["courses"].pop(name, None)
+
+		delete_users = payload.get("delete_users")
+		if isinstance(delete_users, list):
+			for mobile in delete_users:
+				state["users"].pop(mobile, None)
+
 		conn.execute(
 			"INSERT INTO app_state (id, data) VALUES (1, ?) "
 			"ON CONFLICT(id) DO UPDATE SET data = excluded.data",
 			(json.dumps(state),),
 		)
 		conn.commit()
+		return state
 
 
 class AppHandler(SimpleHTTPRequestHandler):
@@ -91,10 +131,15 @@ class AppHandler(SimpleHTTPRequestHandler):
 				length = int(self.headers.get("Content-Length", 0))
 				raw = self.rfile.read(length) if length else b"{}"
 				incoming = json.loads(raw or b"{}")
-				if not isinstance(incoming, dict) or "courses" not in incoming or "users" not in incoming:
-					raise ValueError("Payload must include 'courses' and 'users'.")
-				write_state({"courses": incoming["courses"], "users": incoming["users"]})
-				self._send_json(200, {"ok": True})
+				if not isinstance(incoming, dict):
+					raise ValueError("Payload must be a JSON object.")
+				allowed_keys = {"courses", "users", "delete_courses", "delete_users"}
+				if not any(k in incoming for k in allowed_keys):
+					raise ValueError(
+						"Payload must include at least one of: courses, users, delete_courses, delete_users."
+					)
+				new_state = merge_state(incoming)
+				self._send_json(200, {"ok": True, "data": new_state})
 			except Exception as exc:
 				self._send_json(400, {"ok": False, "error": str(exc)})
 			return

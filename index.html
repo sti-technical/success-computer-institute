@@ -87,12 +87,53 @@ input:not([type=checkbox]),select{background:var(--surf);color:var(--i);border:1
 .score-date{color:var(--mut)}
 .score-result{background:linear-gradient(135deg,#050805,#123314)}
 .table th{color:var(--l)}
-</style></head><body><div class="app"><aside class="side"><div class="logo"><div class="mark">S</div><div>SUCCESS<small>COMPUTER INSTITUTE</small></div></div><nav class="nav"><button data-view="home">⌂ <span>Dashboard</span></button><button data-view="history">▣ <span>My Tests</span></button><button data-view="results">✓ <span>Results</span></button><button data-view="leaderboard">🏆 <span>Leaderboard</span></button><button class="test" id="testAccount">◈ <span>Test Account</span></button><button class="score" id="resultScore">◉ <span>Result Score</span></button></nav><div class="note">Learn. Practice. Succeed.</div></aside><main class="main"><section id="home" class="view show"><header class="top"><div><div class="ey">Student learning portal</div><h1 class="h1" id="welcome">स्वागत है, विद्यार्थी</h1></div><button class="secondary" id="admin">⚙</button></header><div class="grid hero-wrap"><section class="hero"><div class="ey">Your learning dashboard</div><h2>अपनी तैयारी को<br>परखिए, अभी।</h2><p>Course चुनें, test दें और तुरंत अपना result देखें।</p><div class="stats"><div class="stat"><b id="courseCount">01</b><span>Active courses</span></div><div class="stat"><b id="testCount">00</b><span>Tests completed</span></div><div class="stat"><b id="avg">--</b><span>Average score</span></div></div></section><section class="card signup-card"><h3>Mobile verification</h3><p class="muted">पहली बार अपना test account बनाएं</p><div class="field"><label>पूरा नाम</label><input id="name" placeholder="जैसे Rahul Kumar"></div><div class="field"><label>मोबाइल नंबर</label><input id="mobile" maxlength="10" placeholder="10 digit mobile"></div><div class="field"><label>Password बनाएं</label><input id="signupPassword" type="password" placeholder="कम से कम 4 अक्षर/अंक"></div><div class="field"><label>Password confirm करें</label><input id="signupConfirmPassword" type="password" placeholder="Password दोबारा डालें"></div><button class="primary full" id="send">Send verification code →</button><button class="secondary full" id="openLogin" style="margin-top:10px">पहले से account है? Login करें</button></section></div><section class="below"><h2 class="h1" style="font-size:24px">Courses & tests</h2><div class="courses" id="courses"></div></section></section><section id="history" class="view"><header class="top"><div><div class="ey">Student profile</div><h1 class="h1">My tests</h1></div><button class="secondary" data-view="home">← Dashboard</button></header><div class="card"><h3 id="profile">Guest profile</h3><p class="muted" id="profileId">User ID से login करें।</p></div><div class="courses" id="historyList"></div></section><section id="leaderboard" class="view"><header class="top"><div><div class="ey">Healthy competition</div><h1 class="h1">Leaderboard</h1></div><button class="secondary" data-view="home">← Dashboard</button></header><div class="card"><div class="field"><label>Course चुनें</label><select id="leaderboardCourse"></select></div><div id="leaderboardTable"></div></div></section><section id="results" class="view"><header class="top"><div><div class="ey">Performance review</div><h1 class="h1">My results</h1></div><button class="secondary" data-view="home">← Dashboard</button></header><div id="detail"></div></section><section id="quiz" class="view"><div class="quiz"><button class="secondary" data-view="home">← Dashboard</button><p class="ey">Live test · <span id="quizCourse"></span></p><div id="timer" class="timer">00:00</div><div id="qText" class="question"></div><div id="options"></div><div class="quizfoot"><button class="secondary" id="prev">← Previous</button><button class="primary" id="next">Next →</button></div></div></section><section id="adminView" class="view"><header class="top"><div><div class="ey">Institute workspace</div><h1 class="h1">Admin panel</h1></div><button class="secondary" data-view="home">← Student portal</button></header><div class="admin" style="margin-bottom:20px"><h3>Institute analytics</h3><div id="adminAnalytics"></div></div><div class="admin"><h3>Course & question bank</h3><div class="field"><input id="newCourse" placeholder="New course name"><button class="secondary full" id="addCourse">＋ Add course</button></div><div class="field"><label>Excel किस course में import हो?</label><select id="courseSelect"></select></div><div class="field"><input id="file" type="file" accept=".csv,.xlsx,.xls"><button class="secondary full" id="uploadQuestionsBtn" style="margin-top:8px">Upload questions</button><button class="danger full" id="deleteBank">Delete selected course question bank</button><button class="danger full" id="deleteCourse" style="margin-top:8px">Delete selected course permanently</button></div><p class="muted">Excel columns: course, question, optionA, optionB, optionC, optionD, answer. Selected course में ही questions save होंगे।</p><div id="adminCourses"></div><h3 style="margin-top:26px">Single question जोड़ें</h3><div class="field"><label>Question किस course में जोड़ें?</label><select id="singleQCourse"></select></div><div class="field"><label>Question</label><input id="singleQText" placeholder="जैसे: RAM का पूरा नाम क्या है?"></div><div class="field"><label>Option A</label><input id="singleOptA" placeholder="Option A"></div><div class="field"><label>Option B</label><input id="singleOptB" placeholder="Option B"></div><div class="field"><label>Option C</label><input id="singleOptC" placeholder="Option C"></div><div class="field"><label>Option D</label><input id="singleOptD" placeholder="Option D"></div><div class="field"><label>सही उत्तर</label><select id="singleAnswer"><option value="0">Option A</option><option value="1">Option B</option><option value="2">Option C</option><option value="3">Option D</option></select></div><button class="primary full" id="addSingleQuestion">＋ Question जोड़ें</button></div></section></main></div><div class="modal" id="otpModal"><div class="modalbox glassbox"><button class="close" data-close="otpModal">×</button><div class="ey">Test account verification</div><h3>Demo verification code</h3><p class="muted">Name और mobile के last 2 digits से बना code डालें।</p><div class="field"><input id="otp" placeholder="Demo code"></div><button class="primary full" id="verify">Verify & create test account</button></div></div><div class="modal" id="loginUserModal"><div class="modalbox glassbox"><button class="close" data-close="loginUserModal">×</button><div class="ey">Student login</div><h3>अपने account में login करें</h3><div class="field"><label>Mobile नंबर या User ID</label><input id="loginIdentity" placeholder="मोबाइल या User ID"></div><div class="field"><label>Password</label><input id="loginPassword" type="password" placeholder="Password"></div><button class="primary full" id="userLoginBtn">Login</button><button class="secondary full" id="openForgot" style="margin-top:10px">Password भूल गए?</button></div></div><div class="modal" id="forgotModal"><div class="modalbox glassbox"><button class="close" data-close="forgotModal">×</button><div class="ey">Password reset</div><h3>Password reset करें</h3><div id="forgotStep1"><div class="field"><label>Mobile नंबर या User ID</label><input id="forgotIdentity" placeholder="मोबाइल या User ID"></div><button class="primary full" id="forgotSendCode">Verification code भेजें</button></div><div id="forgotStep2" style="display:none"><div class="field"><label>Demo verification code</label><input id="forgotCode" placeholder="Demo code डालें"></div><div class="field"><label>नया Password</label><input id="forgotNewPassword" type="password" placeholder="कम से कम 4 अक्षर/अंक"></div><button class="primary full" id="forgotResetBtn">Password reset करें</button></div></div></div><div class="modal" id="loginModal"><div class="modalbox glassbox"><button class="close" data-close="loginModal">×</button><div class="ey">Admin access</div><h3>Admin login</h3><input id="adminId" placeholder="User ID" class="field"><input id="adminPass" type="password" placeholder="Password" class="field"><button class="primary full" id="login">Login</button></div></div><div class="modal" id="scoreModal"><div class="modalbox lookup"><button class="score-close close" data-close="scoreModal">×</button><div class="ey" style="color:var(--l)">Student score lookup</div><h3>Course-wise result score</h3><p>Test Account User ID डालें</p><input id="scoreId" placeholder="जैसे rahulkumar10" class="field"><button class="primary full" id="find">View all results</button><div id="scoreOut"></div></div></div><div id="toast"></div><script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script><script>const defaults={"Computer Fundamentals":{active:true,duration:20,questions:[{q:'कंप्यूटर का brain किसे कहा जाता है?',o:['Monitor','CPU','Keyboard','Mouse'],a:1},{q:'1 Byte में कितने Bits होते हैं?',o:['4','8','16','32'],a:1}]},"MS Office Basics":{active:false,duration:20,questions:[]},"Typing Mastery":{active:false,duration:20,questions:[]}};
+</style></head><body><div class="app"><aside class="side"><div class="logo"><div class="mark">S</div><div>SUCCESS<small>COMPUTER INSTITUTE</small></div></div><nav class="nav"><button data-view="home">⌂ <span>Dashboard</span></button><button data-view="history">▣ <span>My Tests</span></button><button data-view="results">✓ <span>Results</span></button><button data-view="leaderboard">🏆 <span>Leaderboard</span></button><button class="test" id="testAccount">◈ <span>Test Account</span></button><button class="score" id="resultScore">◉ <span>Result Score</span></button></nav><div class="note">Learn. Practice. Succeed.</div></aside><main class="main"><section id="home" class="view show"><header class="top"><div><div class="ey">Student learning portal</div><h1 class="h1" id="welcome">स्वागत है, विद्यार्थी</h1></div><button class="secondary" id="logoutBtn" style="display:none;margin-right:8px">Logout</button><button class="secondary" id="admin">⚙</button></header><div class="grid hero-wrap"><section class="hero"><div class="ey">Your learning dashboard</div><h2>अपनी तैयारी को<br>परखिए, अभी।</h2><p>Course चुनें, test दें और तुरंत अपना result देखें।</p><div class="stats"><div class="stat"><b id="courseCount">01</b><span>Active courses</span></div><div class="stat"><b id="testCount">00</b><span>Tests completed</span></div><div class="stat"><b id="avg">--</b><span>Average score</span></div></div></section><section class="card signup-card"><h3>Mobile verification</h3><p class="muted">पहली बार अपना test account बनाएं</p><div class="field"><label>पूरा नाम</label><input id="name" placeholder="जैसे Rahul Kumar"></div><div class="field"><label>मोबाइल नंबर</label><input id="mobile" maxlength="10" placeholder="10 digit mobile"></div><div class="field"><label>Password बनाएं</label><input id="signupPassword" type="password" placeholder="कम से कम 4 अक्षर/अंक"></div><div class="field"><label>Password confirm करें</label><input id="signupConfirmPassword" type="password" placeholder="Password दोबारा डालें"></div><button class="primary full" id="send">Send verification code →</button><button class="secondary full" id="openLogin" style="margin-top:10px">पहले से account है? Login करें</button></section></div><section class="below"><h2 class="h1" style="font-size:24px">Courses & tests</h2><div class="courses" id="courses"></div></section></section><section id="history" class="view"><header class="top"><div><div class="ey">Student profile</div><h1 class="h1">My tests</h1></div><button class="secondary" data-view="home">← Dashboard</button></header><div class="card"><h3 id="profile">Guest profile</h3><p class="muted" id="profileId">User ID से login करें।</p></div><div class="courses" id="historyList"></div></section><section id="leaderboard" class="view"><header class="top"><div><div class="ey">Healthy competition</div><h1 class="h1">Leaderboard</h1></div><button class="secondary" data-view="home">← Dashboard</button></header><div class="card"><div class="field"><label>Course चुनें</label><select id="leaderboardCourse"></select></div><div id="leaderboardTable"></div></div></section><section id="results" class="view"><header class="top"><div><div class="ey">Performance review</div><h1 class="h1">My results</h1></div><button class="secondary" data-view="home">← Dashboard</button></header><div id="detail"></div></section><section id="quiz" class="view"><div class="quiz"><button class="secondary" data-view="home">← Dashboard</button><p class="ey">Live test · <span id="quizCourse"></span></p><div id="timer" class="timer">00:00</div><div id="qText" class="question"></div><div id="options"></div><div class="quizfoot"><button class="secondary" id="prev">← Previous</button><button class="primary" id="next">Next →</button></div></div></section><section id="adminView" class="view"><header class="top"><div><div class="ey">Institute workspace</div><h1 class="h1">Admin panel</h1></div><button class="secondary" data-view="home">← Student portal</button></header><div class="admin" style="margin-bottom:20px"><h3>Institute analytics</h3><div id="adminAnalytics"></div></div><div class="admin"><h3>Course & question bank</h3><div class="field"><input id="newCourse" placeholder="New course name"><button class="secondary full" id="addCourse">＋ Add course</button></div><div class="field"><label>Excel किस course में import हो?</label><select id="courseSelect"></select></div><div class="field"><input id="file" type="file" accept=".csv,.xlsx,.xls"><button class="secondary full" id="uploadQuestionsBtn" style="margin-top:8px">Upload questions</button><button class="danger full" id="deleteBank">Delete selected course question bank</button><button class="danger full" id="deleteCourse" style="margin-top:8px">Delete selected course permanently</button></div><p class="muted">Excel columns: course, question, optionA, optionB, optionC, optionD, answer. Selected course में ही questions save होंगे।</p><div id="adminCourses"></div><h3 style="margin-top:26px">Single question जोड़ें</h3><div class="field"><label>Question किस course में जोड़ें?</label><select id="singleQCourse"></select></div><div class="field"><label>Question</label><input id="singleQText" placeholder="जैसे: RAM का पूरा नाम क्या है?"></div><div class="field"><label>Option A</label><input id="singleOptA" placeholder="Option A"></div><div class="field"><label>Option B</label><input id="singleOptB" placeholder="Option B"></div><div class="field"><label>Option C</label><input id="singleOptC" placeholder="Option C"></div><div class="field"><label>Option D</label><input id="singleOptD" placeholder="Option D"></div><div class="field"><label>सही उत्तर</label><select id="singleAnswer"><option value="0">Option A</option><option value="1">Option B</option><option value="2">Option C</option><option value="3">Option D</option></select></div><button class="primary full" id="addSingleQuestion">＋ Question जोड़ें</button></div></section></main></div><div class="modal" id="otpModal"><div class="modalbox glassbox"><button class="close" data-close="otpModal">×</button><div class="ey">Test account verification</div><h3>Demo verification code</h3><p class="muted">Name और mobile के last 2 digits से बना code डालें।</p><div class="field"><input id="otp" placeholder="Demo code"></div><button class="primary full" id="verify">Verify & create test account</button></div></div><div class="modal" id="loginUserModal"><div class="modalbox glassbox"><button class="close" data-close="loginUserModal">×</button><div class="ey">Student login</div><h3>अपने account में login करें</h3><div class="field"><label>Mobile नंबर या User ID</label><input id="loginIdentity" placeholder="मोबाइल या User ID"></div><div class="field"><label>Password</label><input id="loginPassword" type="password" placeholder="Password"></div><button class="primary full" id="userLoginBtn">Login</button><button class="secondary full" id="openForgot" style="margin-top:10px">Password भूल गए?</button></div></div><div class="modal" id="forgotModal"><div class="modalbox glassbox"><button class="close" data-close="forgotModal">×</button><div class="ey">Password reset</div><h3>Password reset करें</h3><div id="forgotStep1"><div class="field"><label>Mobile नंबर या User ID</label><input id="forgotIdentity" placeholder="मोबाइल या User ID"></div><button class="primary full" id="forgotSendCode">Verification code भेजें</button></div><div id="forgotStep2" style="display:none"><div class="field"><label>Demo verification code</label><input id="forgotCode" placeholder="Demo code डालें"></div><div class="field"><label>नया Password</label><input id="forgotNewPassword" type="password" placeholder="कम से कम 4 अक्षर/अंक"></div><button class="primary full" id="forgotResetBtn">Password reset करें</button></div></div></div><div class="modal" id="loginModal"><div class="modalbox glassbox"><button class="close" data-close="loginModal">×</button><div class="ey">Admin access</div><h3>Admin login</h3><input id="adminId" placeholder="User ID" class="field"><input id="adminPass" type="password" placeholder="Password" class="field"><button class="primary full" id="login">Login</button></div></div><div class="modal" id="scoreModal"><div class="modalbox lookup"><button class="score-close close" data-close="scoreModal">×</button><div class="ey" style="color:var(--l)">Student score lookup</div><h3>Course-wise result score</h3><p>Test Account User ID डालें</p><input id="scoreId" placeholder="जैसे rahulkumar10" class="field"><button class="primary full" id="find">View all results</button><div id="scoreOut"></div></div></div><div id="toast"></div><script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script><script>const defaults={"Computer Fundamentals":{active:true,duration:20,questions:[{q:'कंप्यूटर का brain किसे कहा जाता है?',o:['Monitor','CPU','Keyboard','Mouse'],a:1},{q:'1 Byte में कितने Bits होते हैं?',o:['4','8','16','32'],a:1}]},"MS Office Basics":{active:false,duration:20,questions:[]},"Typing Mastery":{active:false,duration:20,questions:[]}};
 let courses=defaults,users={},current=null,chosen=[],quizQuestions=[],index=0,activeCourse='',pendingName='',pendingMobile='',pendingCode='',pendingPassword='',forgotMobile='',forgotCode='',timerInterval=null,timerEndsAt=0;
 const $=id=>document.getElementById(id),toast=t=>{alert(t)};
 const uid=(n,m)=>n.replace(/[^a-z0-9]/gi,'').toLowerCase()+m.slice(-2);
 function simpleHash(str){let hash=0;for(let i=0;i<str.length;i++){hash=(hash*31+str.charCodeAt(i))>>>0}return 'h'+hash.toString(36)}
-function save(){localStorage.sciCourses=JSON.stringify(courses);localStorage.sciUsers=JSON.stringify(users);fetch('/api/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({courses,users})}).catch(()=>{})}
+function applyServerState(data){
+	if(data&&data.courses){courses=data.courses}
+	if(data&&data.users){users=data.users}
+	localStorage.sciCourses=JSON.stringify(courses);localStorage.sciUsers=JSON.stringify(users)
+}
+function postData(payload){
+	return fetch('/api/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+		.then(r=>r.ok?r.json():Promise.reject())
+		.then(res=>{if(res&&res.ok)applyServerState(res.data)})
+		.catch(()=>{})
+}
+// Saves ONLY the given user's own record (not the whole users list), so one
+// student's signup/login/attempt can never overwrite another student's data
+// that was saved around the same time.
+function saveUser(mobile){
+	if(!mobile||!users[mobile])return Promise.resolve();
+	localStorage.sciCourses=JSON.stringify(courses);localStorage.sciUsers=JSON.stringify(users);
+	return postData({users:{[mobile]:users[mobile]}})
+}
+// Saves ONLY the given course(s), so admin edits never touch student records
+// and two course edits don't clobber each other.
+function saveCourses(names){
+	const payload={};(Array.isArray(names)?names:[names]).forEach(n=>{if(courses[n])payload[n]=courses[n]});
+	localStorage.sciCourses=JSON.stringify(courses);localStorage.sciUsers=JSON.stringify(users);
+	return postData({courses:payload})
+}
+function deleteCourseOnServer(name){
+	localStorage.sciCourses=JSON.stringify(courses);
+	return postData({delete_courses:[name]})
+}
+// Pulls the latest shared data from the server without disturbing local-only
+// UI state (current login, in-progress quiz). Used before showing views that
+// other students/admin could have changed (leaderboard, admin panel).
+async function refreshFromServer(){
+	try{
+		const res=await fetch('/api/data');
+		if(!res.ok)return;
+		const data=await res.json();
+		applyServerState(data)
+	}catch(e){}
+}
+function setCurrent(mobile){current=mobile;if(mobile){localStorage.sciCurrent=mobile}else{localStorage.removeItem('sciCurrent')}}
 function me(){return current?users[current]:null}
 
 function populateSelects(){
@@ -108,6 +149,7 @@ function populateSelects(){
 function render(){
 	const u=me(),names=Object.keys(courses),done=new Set(u?.attempts?.map(a=>a.course)||[]);
 	$('welcome').textContent=u?'स्वागत है, '+u.name:'स्वागत है, विद्यार्थी';
+	$('logoutBtn').style.display=u?'inline-block':'none';
 	$('courseCount').textContent=Object.values(courses).filter(c=>c.active).length;
 	$('testCount').textContent=u?.attempts?.length||0;
 	$('avg').textContent=u?.attempts?.length?Math.round(u.attempts.reduce((s,a)=>s+a.percent,0)/u.attempts.length)+'%':'--';
@@ -130,8 +172,9 @@ function show(id){
 	document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
 	$(id).classList.add('show');
 	if(id==='home')render();
-	if(id==='leaderboard')renderLeaderboard();
-	if(id==='adminView'){renderAdminCourses();renderAdminAnalytics()}
+	if(id==='history')refreshFromServer().then(render);
+	if(id==='leaderboard')refreshFromServer().then(renderLeaderboard);
+	if(id==='adminView')refreshFromServer().then(()=>{renderAdminCourses();renderAdminAnalytics()})
 }
 
 function bind(){
@@ -192,7 +235,7 @@ function finish(auto){
 	stopTimer();
 	const qs=quizQuestions,correct=qs.filter((q,i)=>q.a===chosen[i]).length,a={id:Date.now(),course:activeCourse,correct,total:qs.length,percent:Math.round(correct/qs.length*100),date:new Date().toLocaleDateString('en-IN'),questions:qs.map((q,i)=>({...q,chosen:chosen[i]}))};
 	me().attempts.unshift(a);
-	save();render();show('results');detail(a);
+	saveUser(current);render();show('results');detail(a);
 	if(auto)toast('समय समाप्त हो गया! Test automatically submit हो गया।')
 }
 function detail(a){
@@ -217,8 +260,8 @@ function renderLeaderboard(){
 function renderAdminCourses(){
 	const container=$('adminCourses');if(!container)return;
 	container.innerHTML=Object.entries(courses).map(([name,course])=>`<label class="card course" style="display:flex;align-items:center;gap:10px;padding:14px;flex-wrap:wrap"><input type="checkbox" data-toggle-course="${name}" ${course.active?'checked':''}><span style="flex:1"><b>${name}</b><small class="muted" style="display:block">${course.questions.length} questions</small></span><span style="display:flex;align-items:center;gap:6px"><small class="muted">Time (min)</small><input type="number" min="1" max="180" value="${course.duration||20}" data-duration-course="${name}" style="width:60px;padding:6px;border:1px solid var(--line);border-radius:6px"></span></label>`).join('');
-	container.querySelectorAll('[data-toggle-course]').forEach(input=>input.onchange=()=>{courses[input.dataset.toggleCourse].active=input.checked;save();render();renderAdminCourses()});
-	container.querySelectorAll('[data-duration-course]').forEach(input=>input.onchange=()=>{const val=Math.max(1,Math.min(180,+input.value||20));courses[input.dataset.durationCourse].duration=val;input.value=val;save();render()})
+	container.querySelectorAll('[data-toggle-course]').forEach(input=>input.onchange=()=>{const name=input.dataset.toggleCourse;courses[name].active=input.checked;saveCourses(name).then(()=>{render();renderAdminCourses()})});
+	container.querySelectorAll('[data-duration-course]').forEach(input=>input.onchange=()=>{const name=input.dataset.durationCourse,val=Math.max(1,Math.min(180,+input.value||20));courses[name].duration=val;input.value=val;saveCourses(name).then(render)})
 }
 
 /* ---------- Admin Dashboard Analytics (Feature 4) ---------- */
@@ -241,19 +284,19 @@ $('addCourse').onclick=()=>{
 	const name=$('newCourse').value.trim();
 	if(!name||courses[name])return toast('Valid unique course name भरें।');
 	courses[name]={active:false,duration:20,questions:[]};
-	save();render();renderAdminCourses();show('adminView');$('newCourse').value='';
-	toast(`${name} course add हो गया।`)
+	saveCourses(name).then(()=>{render();renderAdminCourses();show('adminView');$('newCourse').value='';
+	toast(`${name} course add हो गया।`)})
 };
 $('deleteBank').onclick=()=>{
 	const n=$('courseSelect').value;
 	if(!confirm('Selected course question bank delete करें?'))return;
-	courses[n].questions=[];courses[n].active=false;save();render();renderAdminCourses()
+	courses[n].questions=[];courses[n].active=false;saveCourses(n).then(()=>{render();renderAdminCourses()})
 };
 $('deleteCourse').onclick=()=>{
 	const name=$('courseSelect').value;
 	if(!name||!confirm(`${name} course permanently delete करें?`))return;
-	delete courses[name];save();render();renderAdminCourses();
-	toast(`${name} course delete हो गया।`)
+	delete courses[name];deleteCourseOnServer(name).then(()=>{render();renderAdminCourses();
+	toast(`${name} course delete हो गया।`)})
 };
 function importQuestions(file){
 	const reader=new FileReader();
@@ -273,8 +316,8 @@ function importQuestions(file){
 			if(!questions.length)throw new Error('Valid question rows nahi mile. Format: course,question,optionA,optionB,optionC,optionD,answer');
 			const courseName=$('courseSelect').value;
 			courses[courseName].questions=questions;courses[courseName].active=true;
-			save();render();renderAdminCourses();
-			toast(`${questions.length} questions ${courseName} mein upload ho gaye.`)
+			saveCourses(courseName).then(()=>{render();renderAdminCourses();
+			toast(`${questions.length} questions ${courseName} mein upload ho gaye.`)})
 		}catch(err){toast(err.message||'File upload nahi ho payi.')}
 	};
 	reader.readAsArrayBuffer(file)
@@ -292,9 +335,9 @@ $('addSingleQuestion').onclick=()=>{
 	if(!questionText||!optA||!optB||!optC||!optD)return toast('Question aur chaaron options bharna zaroori hai.');
 	courses[courseName].questions.push({q:questionText,o:[optA,optB,optC,optD],a:answerIndex});
 	courses[courseName].active=true;
-	save();render();renderAdminCourses();
+	saveCourses(courseName).then(()=>{render();renderAdminCourses();
 	$('singleQText').value='';$('singleOptA').value='';$('singleOptB').value='';$('singleOptC').value='';$('singleOptD').value='';$('singleAnswer').value='0';
-	toast(`Question ${courseName} mein add ho gaya. Ab total ${courses[courseName].questions.length} questions hain.`)
+	toast(`Question ${courseName} mein add ho gaya. Ab total ${courses[courseName].questions.length} questions hain.`)})
 };
 
 /* ---------- Admin login ---------- */
@@ -306,11 +349,12 @@ $('login').onclick=()=>{
 
 /* ---------- Student signup with password (Feature 5) ---------- */
 $('testAccount').onclick=()=>{$('name').focus()};
-$('send').onclick=()=>{
+$('send').onclick=async()=>{
 	const name=$('name').value.trim(),mobile=$('mobile').value.trim(),pass=$('signupPassword').value,confirmPass=$('signupConfirmPassword').value;
 	if(name.length<2||!/^[0-9]{10}$/.test(mobile))return toast('पूरा नाम और 10 digit mobile भरें।');
 	if(pass.length<4)return toast('Password कम से कम 4 अक्षर/अंकों का होना चाहिए।');
 	if(pass!==confirmPass)return toast('Password aur Confirm Password match nahi kar rahe.');
+	await refreshFromServer();
 	if(users[mobile]&&users[mobile].password)return toast('Is mobile number se account pehle se bana hai. "Login करें" button use karein.');
 	pendingName=name;pendingMobile=mobile;pendingPassword=simpleHash(pass);pendingCode=uid(name,mobile);
 	$('otp').value=pendingCode;
@@ -321,23 +365,27 @@ $('verify').onclick=()=>{
 	if(!pendingCode||entered!==pendingCode)return toast('Demo code गलत है। Sahi code: '+pendingCode);
 	const oldUser=users[pendingMobile]||{attempts:[]};
 	users[pendingMobile]={...oldUser,name:pendingName,mobile:pendingMobile,userId:pendingCode,password:pendingPassword,attempts:oldUser.attempts||[]};
-	current=pendingMobile;
-	save();
+	setCurrent(pendingMobile);
+	saveUser(pendingMobile).then(render);
 	$('otpModal').classList.remove('open');
 	$('signupPassword').value='';$('signupConfirmPassword').value='';
 	render();
 	toast('Account ban gaya! User ID: '+pendingCode+'. Ise yaad rakhein, dobara login karne ke liye chahiye hoga.')
 };
 
+/* ---------- Logout ---------- */
+$('logoutBtn').onclick=()=>{setCurrent(null);render();show('home');toast('Aap logout ho gaye.')};
+
 /* ---------- Login for returning users (Feature 5) ---------- */
 $('openLogin').onclick=()=>{$('loginUserModal').classList.add('open');$('loginIdentity').focus()};
-$('userLoginBtn').onclick=()=>{
+$('userLoginBtn').onclick=async()=>{
+	await refreshFromServer();
 	const identity=$('loginIdentity').value.trim().toLowerCase().replace(/[^a-z0-9]/g,''),pass=$('loginPassword').value,match=Object.entries(users).find(([mobile,u])=>[mobile,u.userId].some(v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'')===identity));
 	if(!match)return toast('Account nahi mila. Pehle "Test Account" se signup karein.');
 	const[mobile,u]=match;
 	if(!u.password)return toast('Is account me password set nahi hai. Naya signup karke password banayein.');
 	if(simpleHash(pass)!==u.password)return toast('Password galat hai.');
-	current=mobile;save();
+	setCurrent(mobile);
 	$('loginUserModal').classList.remove('open');$('loginIdentity').value='';$('loginPassword').value='';
 	render();show('home');
 	toast('Welcome back, '+u.name+'!')
@@ -350,7 +398,8 @@ $('openForgot').onclick=()=>{
 	$('forgotStep1').style.display='block';$('forgotStep2').style.display='none';
 	$('forgotIdentity').focus()
 };
-$('forgotSendCode').onclick=()=>{
+$('forgotSendCode').onclick=async()=>{
+	await refreshFromServer();
 	const identity=$('forgotIdentity').value.trim().toLowerCase().replace(/[^a-z0-9]/g,''),match=Object.entries(users).find(([mobile,u])=>[mobile,u.userId].some(v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'')===identity));
 	if(!match)return toast('Account nahi mila।');
 	forgotMobile=match[0];forgotCode=uid(match[1].name,match[0]);
@@ -363,7 +412,7 @@ $('forgotResetBtn').onclick=()=>{
 	const newPass=$('forgotNewPassword').value;
 	if(newPass.length<4)return toast('Naya password kam se kam 4 characters ka ho.');
 	users[forgotMobile].password=simpleHash(newPass);
-	save();
+	saveUser(forgotMobile);
 	$('forgotModal').classList.remove('open');
 	$('forgotIdentity').value='';$('forgotCode').value='';$('forgotNewPassword').value='';
 	toast('Password reset ho gaya! Ab naye password se login karein.')
@@ -371,7 +420,8 @@ $('forgotResetBtn').onclick=()=>{
 
 /* ---------- Result score lookup ---------- */
 $('resultScore').onclick=()=>{$('scoreModal').classList.add('open');$('scoreId').focus()};
-$('find').onclick=()=>{
+$('find').onclick=async()=>{
+	await refreshFromServer();
 	const entered=$('scoreId').value.trim().toLowerCase().replace(/[^a-z0-9]/g,''),match=Object.entries(users).map(([mobile,user])=>({mobile,user})).find(({mobile,user})=>[mobile,user.mobile,user.userId].some(value=>String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'')===entered));
 	if(!match){$('scoreOut').innerHTML='<p class="muted">User ID nahi mila. Isi browser/device ka sahi User ID डालें.</p>';return}
 	const attempts=match.user.attempts||[],total=attempts.reduce((sum,item)=>sum+item.total,0),correct=attempts.reduce((sum,item)=>sum+item.correct,0),average=attempts.length?Math.round(attempts.reduce((sum,item)=>sum+item.percent,0)/attempts.length):0;
@@ -398,6 +448,8 @@ $('leaderboardCourse').onchange=renderLeaderboard;
 		users=JSON.parse(localStorage.sciUsers||'{}')
 	}
 	Object.values(courses).forEach(c=>{if(!c.duration)c.duration=20});
+	const savedCurrent=localStorage.sciCurrent;
+	if(savedCurrent&&users[savedCurrent]){current=savedCurrent}else{localStorage.removeItem('sciCurrent')}
 	bind();render();renderAdminCourses();renderAdminAnalytics()
 })();
 </script></body></html>
