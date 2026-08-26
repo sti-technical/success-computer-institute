@@ -130,7 +130,20 @@ async function refreshFromServer(){
 		const res=await fetch('/api/data');
 		if(!res.ok)return;
 		const data=await res.json();
-		applyServerState(data)
+		const myLocalRecord=current?users[current]:null;
+		applyServerState(data);
+		// Safety net: a background refresh must never erase test results the
+		// logged-in user just submitted in THIS session if their save to the
+		// server hasn't fully landed yet (slow connection, cold-start host,
+		// etc). If local has more attempts than the server just returned,
+		// trust local — it will sync up properly once the pending save completes.
+		if(current&&myLocalRecord){
+			const localCount=(myLocalRecord.attempts||[]).length,serverCount=(users[current]&&users[current].attempts||[]).length;
+			if(localCount>serverCount){
+				users[current]=myLocalRecord;
+				localStorage.sciUsers=JSON.stringify(users)
+			}
+		}
 	}catch(e){}
 }
 function setCurrent(mobile){current=mobile;if(mobile){localStorage.sciCurrent=mobile}else{localStorage.removeItem('sciCurrent')}}
@@ -172,7 +185,7 @@ function show(id){
 	document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
 	$(id).classList.add('show');
 	if(id==='home')render();
-	if(id==='history')refreshFromServer().then(render);
+	if(id==='history')render();
 	if(id==='leaderboard')refreshFromServer().then(renderLeaderboard);
 	if(id==='adminView')refreshFromServer().then(()=>{renderAdminCourses();renderAdminAnalytics()})
 }
