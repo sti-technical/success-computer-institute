@@ -92,9 +92,19 @@ let courses=defaults,users={},current=null,chosen=[],quizQuestions=[],index=0,ac
 const $=id=>document.getElementById(id),toast=t=>{alert(t)};
 const uid=(n,m)=>n.replace(/[^a-z0-9]/gi,'').toLowerCase()+m.slice(-2);
 function simpleHash(str){let hash=0;for(let i=0;i<str.length;i++){hash=(hash*31+str.charCodeAt(i))>>>0}return 'h'+hash.toString(36)}
+function normalizeCourses(){
+	Object.keys(courses).forEach(n=>{
+		const c=courses[n];
+		if(!c||typeof c!=='object'){courses[n]={active:false,duration:20,questions:[]};return}
+		if(!Array.isArray(c.questions))c.questions=[];
+		if(typeof c.active!=='boolean')c.active=Boolean(c.active);
+		if(!c.duration)c.duration=20
+	})
+}
 function applyServerState(data){
 	if(data&&data.courses){courses=data.courses}
 	if(data&&data.users){users=data.users}
+	normalizeCourses();
 	localStorage.sciCourses=JSON.stringify(courses);localStorage.sciUsers=JSON.stringify(users)
 }
 function postData(payload){
@@ -302,6 +312,7 @@ $('addCourse').onclick=()=>{
 };
 $('deleteBank').onclick=()=>{
 	const n=$('courseSelect').value;
+	if(!n||!courses[n])return toast('Pehle ek valid course select karein.');
 	if(!confirm('Selected course question bank delete करें?'))return;
 	courses[n].questions=[];courses[n].active=false;saveCourses(n).then(()=>{render();renderAdminCourses()})
 };
@@ -328,6 +339,7 @@ function importQuestions(file){
 			}).filter(item=>item.q&&item.o.every(Boolean)&&item.a>=0);
 			if(!questions.length)throw new Error('Valid question rows nahi mile. Format: course,question,optionA,optionB,optionC,optionD,answer');
 			const courseName=$('courseSelect').value;
+			if(!courseName||!courses[courseName])throw new Error('Pehle ek valid course select karein.');
 			courses[courseName].questions=questions;courses[courseName].active=true;
 			saveCourses(courseName).then(()=>{render();renderAdminCourses();
 			toast(`${questions.length} questions ${courseName} mein upload ho gaye.`)})
@@ -460,7 +472,8 @@ $('leaderboardCourse').onchange=renderLeaderboard;
 		courses=JSON.parse(localStorage.sciCourses||'null')||defaults;
 		users=JSON.parse(localStorage.sciUsers||'{}')
 	}
-	Object.values(courses).forEach(c=>{if(!c.duration)c.duration=20});
+	Object.values(courses).forEach(c=>{if(c&&!c.duration)c.duration=20});
+	normalizeCourses();
 	const savedCurrent=localStorage.sciCurrent;
 	if(savedCurrent&&users[savedCurrent]){current=savedCurrent}else{localStorage.removeItem('sciCurrent')}
 	bind();render();renderAdminCourses();renderAdminAnalytics()
