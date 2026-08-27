@@ -1,13 +1,35 @@
 import json
 import os
-import sqlite3
 import threading
+import urllib.error
+import urllib.request
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).parent
-DB_PATH = ROOT / "success_institute.db"
 LOCK = threading.Lock()
+
+# ---------------------------------------------------------------------------
+# Persistent storage: Supabase (Postgres via PostgREST).
+#
+# Render's FREE plan has an ephemeral filesystem — any local file (including a
+# SQLite .db) is wiped every time the service redeploys, restarts, or spins
+# down after 15 minutes idle. That was the cause of admin/student data
+# "disappearing on its own". Supabase's free Postgres project lives outside
+# Render entirely, so data survives restarts, redeploys, and spin-downs.
+#
+# Set these two environment variables on Render (Dashboard -> your service ->
+# Environment):
+#   SUPABASE_URL  -> https://xxxxxxxx.supabase.co   (Project Settings -> API)
+#   SUPABASE_KEY  -> the "service_role" secret key   (Project Settings -> API)
+#
+# If they are not set (e.g. while developing on your own laptop), the server
+# automatically falls back to a local SQLite file so you can still test
+# offline — but remember that fallback does NOT persist on Render's free plan.
+# ---------------------------------------------------------------------------
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+USE_SUPABASE = bool(SUPABASE_URL and SUPABASE_KEY)
 
 DEFAULT_STATE = {
 	"courses": {
@@ -25,29 +47,100 @@ DEFAULT_STATE = {
 }
 
 
-def init_db():
-	with sqlite3.connect(DB_PATH) as conn:
-		conn.execute(
-			"CREATE TABLE IF NOT EXISTS app_state (id INTEGER PRIMARY KEY CHECK (id = 1), data TEXT NOT NULL)"
-		)
-		row = conn.execute("SELECT data FROM app_state WHERE id = 1").fetchone()
-		if row is None:
+def _default_state():
+	return json.loads(json.dumps(DEFAULT_STATE))
+
+
+# ---------------------------------------------------------------------------
+# Supabase (PostgREST) backend
+# ---------------------------------------------------------------------------
+def _supabase_request(method, path, body=None, extra_headers=None, timeout=10):
+	url = f"{SUPABASE_URL}{path}"
+	data = json.dumps(body).encode("utf-8") if body is not None else None
+	req = urllib.request.Request(url, data=data, method=method)
+	req.add_header("apikey", SUPABASE_KEY)
+	req.add_header("Authorization", f"Bearer {SUPABASE_KEY}")
+	req.add_header("Content-Type", "application/json")
+	if extra_headers:
+		for key, value in extra_headers.items():
+			req.add_header(key, value)
+	try:
+		with urllib.request.urlopen(req, timeout=timeout) as resp:
+			raw = resp.read()
+			return json.loads(raw) if raw else None
+	except urllib.error.HTTPError as exc:
+		detail = exc.read().decode("utf-8", "ignore")
+		raise RuntimeError(f"Supabase {method} {path} failed: {exc.code} {detail}") from exc
+
+
+def _supabase_read_state():
+	rows = _supabase_request("GET", "/rest/v1/app_state?id=eq.1&select=data")
+	if rows:
+		return rows[0]["data"]
+	return _default_state()
+
+
+def _supabase_write_state(state):
+	_supabase_request(
+		"POST",
+		"/rest/v1/app_state?on_conflict=id",
+		body=[{"id": 1, "data": state}],
+		extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"},
+	)
+
+
+# ---------------------------------------------------------------------------
+# Local SQLite fallback (dev/offline only — NOT persistent on Render free plan)
+# ---------------------------------------------------------------------------
+if not USE_SUPABASE:
+	import sqlite3
+
+	DB_PATH = ROOT / "success_institute.db"
+
+	def _init_local_db():
+		with sqlite3.connect(DB_PATH) as conn:
 			conn.execute(
-				"INSERT INTO app_state (id, data) VALUES (1, ?)",
-				(json.dumps(DEFAULT_STATE),),
+				"CREATE TABLE IF NOT EXISTS app_state (id INTEGER PRIMARY KEY CHECK (id = 1), data TEXT NOT NULL)"
+			)
+			row = conn.execute("SELECT data FROM app_state WHERE id = 1").fetchone()
+			if row is None:
+				conn.execute(
+					"INSERT INTO app_state (id, data) VALUES (1, ?)",
+					(json.dumps(DEFAULT_STATE),),
+				)
+				conn.commit()
+
+	def _local_read_state():
+		with sqlite3.connect(DB_PATH) as conn:
+			row = conn.execute("SELECT data FROM app_state WHERE id = 1").fetchone()
+			if row is None:
+				return _default_state()
+			try:
+				return json.loads(row[0])
+			except (TypeError, ValueError):
+				return _default_state()
+
+	def _local_write_state(state):
+		with sqlite3.connect(DB_PATH) as conn:
+			conn.execute(
+				"INSERT INTO app_state (id, data) VALUES (1, ?) "
+				"ON CONFLICT(id) DO UPDATE SET data = excluded.data",
+				(json.dumps(state),),
 			)
 			conn.commit()
 
 
+# ---------------------------------------------------------------------------
+# Public read/merge API (used by the HTTP handler below)
+# ---------------------------------------------------------------------------
 def read_state():
-	with LOCK, sqlite3.connect(DB_PATH) as conn:
-		row = conn.execute("SELECT data FROM app_state WHERE id = 1").fetchone()
-		if row is None:
-			return DEFAULT_STATE
-		try:
-			return json.loads(row[0])
-		except (TypeError, ValueError):
-			return DEFAULT_STATE
+	try:
+		if USE_SUPABASE:
+			return _supabase_read_state()
+		return _local_read_state()
+	except Exception as exc:
+		print("read_state failed, using in-memory defaults:", exc, flush=True)
+		return _default_state()
 
 
 def merge_state(payload):
@@ -60,12 +153,8 @@ def merge_state(payload):
 	everyone else's data exactly as-is. Deletions are explicit via
 	delete_courses / delete_users so "not present" never means "delete".
 	"""
-	with LOCK, sqlite3.connect(DB_PATH) as conn:
-		row = conn.execute("SELECT data FROM app_state WHERE id = 1").fetchone()
-		try:
-			state = json.loads(row[0]) if row else json.loads(json.dumps(DEFAULT_STATE))
-		except (TypeError, ValueError):
-			state = json.loads(json.dumps(DEFAULT_STATE))
+	with LOCK:
+		state = read_state()
 		state.setdefault("courses", {})
 		state.setdefault("users", {})
 
@@ -91,12 +180,10 @@ def merge_state(payload):
 			for mobile in delete_users:
 				state["users"].pop(mobile, None)
 
-		conn.execute(
-			"INSERT INTO app_state (id, data) VALUES (1, ?) "
-			"ON CONFLICT(id) DO UPDATE SET data = excluded.data",
-			(json.dumps(state),),
-		)
-		conn.commit()
+		if USE_SUPABASE:
+			_supabase_write_state(state)
+		else:
+			_local_write_state(state)
 		return state
 
 
@@ -115,7 +202,7 @@ class AppHandler(SimpleHTTPRequestHandler):
 	def do_GET(self):
 		path = self.path.split("?", 1)[0]
 		if path == "/api/health":
-			self._send_json(200, {"ok": True, "service": "success-institute"})
+			self._send_json(200, {"ok": True, "service": "success-institute", "storage": "supabase" if USE_SUPABASE else "local-sqlite"})
 			return
 		if path == "/api/data":
 			self._send_json(200, read_state())
@@ -151,7 +238,16 @@ class AppHandler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-	init_db()
+	if USE_SUPABASE:
+		print("Persistent storage: Supabase (data will survive restarts/redeploys).", flush=True)
+	else:
+		print(
+			"WARNING: SUPABASE_URL/SUPABASE_KEY not set — falling back to local SQLite. "
+			"On Render's free plan this file is WIPED on every restart/redeploy/spin-down. "
+			"Set the two env vars to make data permanent.",
+			flush=True,
+		)
+		_init_local_db()
 	port = int(os.environ.get("PORT", "8000"))
 	server = ThreadingHTTPServer(("0.0.0.0", port), AppHandler)
 	print(f"Success Institute server running on port {port}", flush=True)
